@@ -1,13 +1,18 @@
 import { join } from "path";
 import { debug, WorkspaceFolder } from "vscode";
-import { ITestRunnerInterface } from "../interfaces/ITestRunnerInterface";
+// import { ITestRunnerInterface } from "../interfaces/ITestRunnerInterface";
 import { ConfigurationProvider } from "../providers/ConfigurationProvider";
 import { TerminalProvider } from "../providers/TerminalProvider";
+import TestRunner from "./TestRunner";
 
 // TODO: Make a more generic test runner class and extend it
-export class MochaTestRunner implements ITestRunnerInterface {
-  public name: string = "mocha";
-  public path: string = join("node_modules", ".bin", this.name);
+export class MochaTestRunner implements TestRunner {
+  public static readonly NAME: string = "mocha";
+  public static path: string = join(
+    "node_modules",
+    ".bin",
+    MochaTestRunner.NAME
+  );
   public terminalProvider: TerminalProvider = null;
   public configurationProvider: ConfigurationProvider = null;
 
@@ -20,7 +25,7 @@ export class MochaTestRunner implements ITestRunnerInterface {
     this.configurationProvider = configurationProvider;
 
     if (path) {
-      this.path = path;
+      MochaTestRunner.path = path;
     }
   }
 
@@ -34,8 +39,8 @@ export class MochaTestRunner implements ITestRunnerInterface {
       .environmentVariables;
 
     const command = `${
-      this.path
-    } ${fileName} --grep="${testName}" ${additionalArguments}`;
+      MochaTestRunner.path
+    } ${fileName} --fgrep="${testName}" ${additionalArguments}`;
 
     const terminal = this.terminalProvider.get(
       { env: environmentVariables },
@@ -59,7 +64,7 @@ export class MochaTestRunner implements ITestRunnerInterface {
     debug.startDebugging(rootPath, {
       args: [
         fileName,
-        "--grep",
+        "--fgrep",
         testName,
         "--no-timeout",
         ...additionalArguments.split(" ")
@@ -67,7 +72,7 @@ export class MochaTestRunner implements ITestRunnerInterface {
       console: "integratedTerminal",
       env: environmentVariables,
       name: "Debug Test",
-      program: join(rootPath.uri.fsPath, this.path),
+      program: join(rootPath.uri.fsPath, MochaTestRunner.path),
       request: "launch",
       skipFiles,
       type: "node"

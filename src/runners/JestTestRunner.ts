@@ -3,11 +3,17 @@ import { debug, WorkspaceFolder } from "vscode";
 import { ITestRunnerInterface } from "../interfaces/ITestRunnerInterface";
 import { ConfigurationProvider } from "../providers/ConfigurationProvider";
 import { TerminalProvider } from "../providers/TerminalProvider";
+import TestRunner from "./TestRunner";
 
 // TODO: Make a more generic test runner class and extend it
-export class JestTestRunner implements ITestRunnerInterface {
-  public name: string = "jest";
-  public path: string = join("node_modules", ".bin", this.name);
+export class JestTestRunner implements TestRunner {
+  public static readonly NAME: string = "jest";
+  public static path: string = join(
+    "node_modules",
+    ".bin",
+    JestTestRunner.NAME
+  );
+
   public terminalProvider: TerminalProvider = null;
   public configurationProvider: ConfigurationProvider = null;
 
@@ -20,7 +26,7 @@ export class JestTestRunner implements ITestRunnerInterface {
     this.configurationProvider = configurationProvider;
 
     if (path) {
-      this.path = path;
+      JestTestRunner.path = path;
     }
   }
 
@@ -33,7 +39,7 @@ export class JestTestRunner implements ITestRunnerInterface {
     const environmentVariables = this.configurationProvider
       .environmentVariables;
 
-    const command = `${this.path} ${this.transformFileName(
+    const command = `${JestTestRunner.path} ${this.transformFileName(
       fileName
     )} --testNamePattern="${testName}" ${additionalArguments}`;
 
@@ -67,7 +73,7 @@ export class JestTestRunner implements ITestRunnerInterface {
       console: "integratedTerminal",
       env: environmentVariables,
       name: "Debug Test",
-      program: join(rootPath.uri.fsPath, this.path),
+      program: join(rootPath.uri.fsPath, JestTestRunner.path),
       request: "launch",
       skipFiles,
       type: "node"

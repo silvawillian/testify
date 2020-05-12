@@ -3,11 +3,11 @@
 import { exists } from "fs";
 import { basename, join } from "path";
 import { WorkspaceFolder } from "vscode";
-import { ITestRunnerInterface } from "../interfaces/ITestRunnerInterface";
 import { ConfigurationProvider } from "../providers/ConfigurationProvider";
 import { TerminalProvider } from "../providers/TerminalProvider";
 import { JestTestRunner } from "./JestTestRunner";
 import { MochaTestRunner } from "./MochaTestRunner";
+import TestRunner from './TestRunner';
 
 const terminalProvider = new TerminalProvider();
 
@@ -23,6 +23,7 @@ async function getCustomTestRunnerName(
   rootPath: WorkspaceFolder,
   customTestRunnerPath: string
 ): Promise<string> {
+  // TODO: Mover para outro lugar ou remover
   const doesExecutableExist = await doesFileExist(
     join(rootPath.uri.fsPath, customTestRunnerPath)
   );
@@ -37,9 +38,9 @@ async function getCustomTestRunnerName(
 }
 
 async function getAvailableTestRunner(
-  testRunners: ITestRunnerInterface[],
+  testRunners: (typeof TestRunner)[],
   rootPath: WorkspaceFolder
-): Promise<ITestRunnerInterface> {
+): Promise<TestRunner> {
   for (const runner of testRunners) {
     const doesRunnerExist = await doesFileExist(
       join(rootPath.uri.fsPath, runner.path)
@@ -53,9 +54,10 @@ async function getAvailableTestRunner(
   throw new Error("No test runner in your project. Please install one.");
 }
 
+// Achar o path do test runner
 export async function getTestRunner(
   rootPath: WorkspaceFolder
-): Promise<ITestRunnerInterface> {
+): Promise<TestRunner> {
   const configurationProvider = new ConfigurationProvider(rootPath);
   const customTestRunnerPath = configurationProvider.testRunnerPath;
 
@@ -80,14 +82,16 @@ export async function getTestRunner(
     }
   }
 
-  const jestTestRunner = new JestTestRunner(
-    configurationProvider,
-    terminalProvider
-  );
-  const mochaTestRunner = new MochaTestRunner(
-    configurationProvider,
-    terminalProvider
-  );
+  // const jestTestRunner = new JestTestRunner(
+  //   configurationProvider,
+  //   terminalProvider
+  // );
+  // const mochaTestRunner = new MochaTestRunner(
+  //   configurationProvider,
+  //   terminalProvider
+  // );
 
-  return getAvailableTestRunner([jestTestRunner, mochaTestRunner], rootPath);
+  const runners = [JestTestRunner, MochaTestRunner]
+
+  return getAvailableTestRunner(runners, rootPath);
 }

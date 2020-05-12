@@ -1,0 +1,6 @@
+Ideias
+
+Encontrar Test Runner:
+- Busca recursiva a partir do arquivo de teste até a raiz do workspace (semelhante ao Git)
+
+Como solicitar input do usuário?
